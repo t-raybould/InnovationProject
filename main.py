@@ -4,6 +4,7 @@ import argparse
 import ffmpeg
 from pathlib import Path
 import matplotlib.pyplot as plt
+import numpy as np
 
 BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
               "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
@@ -25,15 +26,18 @@ def check_rotation(video_file_location):
     rotate_code = None
     probe = ffmpeg.probe(video_file_location)
     video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
-    rotate = int(video_stream.get('side_data_list', [dict(tags=dict())])[0].get('rotation', 0))
 
-    # TODO 
+    rotate = int(video_stream.get('tags', [dict(tags=dict())]).get('rotate', 0))
 
+    # rotate = int(video_stream.get('side_data_list', [dict(tags=dict())])[0].get('rotation', 0))
+    
     rotate_code = None
-    if (rotate == 90) or (rotate == -270):
+    if (rotate == 90):
         rotate_code = cv2.ROTATE_90_CLOCKWISE
-    elif (rotate == -180) or (rotate == 180):
+    elif (rotate == 180):
         rotate_code = cv2.ROTATE_180
+    elif (rotate == 270):
+        rotate_code = cv2.ROTATE_90_COUNTERCLOCKWISE
 
     return rotate_code
 
@@ -49,7 +53,7 @@ def decompose_video(video_file_location):
         print("VIDEO LOADED SUCCESSFULLY")
     else:
         print("File does not exist or cannot be found")
-        return
+        return 0
     
     rotate_code = check_rotation(video_file_location)
 
@@ -62,6 +66,8 @@ def decompose_video(video_file_location):
         success, frame = video_capture_obj.read()
         count += 1
     
+    print(count)
+
     return count
 
 def process_frames(frame_count):
@@ -75,11 +81,11 @@ def process_frames(frame_count):
         plt.show()
 
 def get_pose_estimation(net, frame):
-    thr = 0.4
+    thr = 0.35
     frame_width = frame.shape[1]
     frame_height = frame.shape[0]
 
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (368, 368), (127.5, 127.5, 127.5), swapRB=True, crop=False)
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (368, 368), (127.5, 127.5, 127.5), swapRB=False, crop=False)
     net.setInput(blob)
     out = net.forward()
 
@@ -88,7 +94,7 @@ def get_pose_estimation(net, frame):
     for i in range(len(BODY_PARTS)):
         heatmap = out[0, i, :, :]
         _, conf, _, point = cv2.minMaxLoc(heatmap)
-
+        
         x = (frame_width * point[0]) / out.shape[3]
         y = (frame_height * point[1]) / out.shape[2]
         points.append((int(x), int(y)) if conf > thr else None)
@@ -103,6 +109,9 @@ def get_pose_estimation(net, frame):
         id_to = BODY_PARTS[part_to]
 
         if points[id_from] and points[id_to]:
+
+
+
             cv2.line(frame, points[id_from], points[id_to], (0, 255, 0), 3)
             cv2.ellipse(frame, points[id_from], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
             cv2.ellipse(frame, points[id_to], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
@@ -121,5 +130,16 @@ if __name__ == '__main__':
 
     video_file_location=args.input
 
-    frame_count = decompose_video(video_file_location) 
+    frame_count = decompose_video(video_file_location)
+    # if(frame_count > 0): 
     process_frames(frame_count)
+    
+    
+    # net = cv2.dnn.readNetFromTensorflow('model.pb')
+
+    # path = str(Path().absolute()) + '/test6.jpg'
+    # frame = cv2.imread(path)
+    # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+    # frame = get_pose_estimation(net, frame)
+    # plt.imshow(frame)
+    # plt.show()
