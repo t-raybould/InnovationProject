@@ -9,7 +9,7 @@ from PoseEstimator import PoseEstimator
 if __name__ == '__main__':
 
     BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-    "LShoulder": 5, "LElbow": 6, "LWriast": 7, "RHip": 8, "RKnee": 9,
+    "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
     "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
     "LEye": 15, "REar": 16, "LEar": 17, "Background": 18}
 
@@ -22,38 +22,42 @@ if __name__ == '__main__':
     # Create ArgumentParser and define arguments to the system
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', help='Path to video')
+    parser.add_argument('--hoz-flip', help='Apply horizontal flip to images', default=0)
     parser.add_argument('--thr', default=0.25, help='Threshold confidence for pose estimation model')
     parser.add_argument('--model', default='model/model.pb', help='Path to model')
     args = parser.parse_args() 
 
-    frame_decomposer = FrameDecomposer(args.input)
+    frame_decomposer = FrameDecomposer(args.input, args.hoz_flip)
     pose_estimator_a = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, True)
-    pose_estimator_b = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, False)
     
     frame_decomposer.decompose_video()
-    
+
     if(frame_decomposer.frame_count > 0):
         frames = []
         a_points = []
-        b_points = []
 
         print("APPLYING POSE ESTIMATOR TO FRAMES")
-        for current_frame in range(0, frame_decomposer.frame_count):
+        # for current_frame in range(0, frame_decomposer.frame_count):
+        for current_frame in range(0, 10):
             frames.append(int(current_frame))
             pose_estimator_a.get_pose_estimation(current_frame)
-            pose_estimator_b.get_pose_estimation(current_frame)
         
-        a_points = pose_estimator_a.avg_points_detected()
-        b_points = pose_estimator_b.avg_points_detected()
-        X_axis = np.arange(len(frames))
+        for pose in pose_estimator_a.poses:
+            pose.draw_pose()
 
-        print(np.mean(a_points))
-        print(np.mean(b_points))
+        
+        
+        # a_points = pose_estimator_a.avg_points_detected()
+        # b_points = pose_estimator_b.avg_points_detected()
+        # X_axis = np.arange(len(frames))
 
-        plt.plot(X_axis, a_points, label="Rotation Applied")
-        plt.plot(X_axis, b_points, label="No Rotation")
+        # print(f"Min: {np.min(a_points)}, Max: {np.max(a_points)}, Mean: {np.mean(a_points)}")
+        # print(f"Min: {np.min(b_points)}, Max: {np.max(b_points)}, Mean: {np.mean(b_points)}")
 
-        plt.xlabel("Frame")
-        plt.ylabel("Number of points detected")
-        plt.legend()
-        plt.savefig('points_detected_graph.png')
+        # plt.plot(X_axis, a_points, label="Rotation Applied")
+        # plt.plot(X_axis, b_points, label="No Rotation")
+
+        # plt.xlabel("Frame")
+        # plt.ylabel("Number of points detected")
+        # plt.legend()
+        # plt.savefig('points_detected_graph.png')

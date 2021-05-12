@@ -3,10 +3,11 @@ import ffmpeg
 from pathlib import Path
 
 class FrameDecomposer():
-    def __init__(self, video_file_location):
+    def __init__(self, video_file_location, hoz_flip):
         self.frame_count = 0
         self.video_file_location = video_file_location
         self.rotate_code = None
+        self.hoz_flip = bool(hoz_flip)
 
         # Make a folder to store frames captured from the video
         path = str(Path().absolute()) + '/tmp_frames'
@@ -48,8 +49,11 @@ class FrameDecomposer():
         success, frame = video_capture_obj.read()
         count = 0
         while success:
+            if self.hoz_flip:
+                frame = cv2.flip(frame, 1)
             if self.rotate_code is not None:
-                frame = cv2.rotate(frame, self.rotate_code)
+                frame = cv2.rotate(frame, self.rotate_code)            
+            
             cv2.imwrite("tmp_frames/frame_%d.jpg" % count, frame)
             success, frame = video_capture_obj.read()
             count += 1
