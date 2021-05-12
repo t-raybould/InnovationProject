@@ -45,9 +45,19 @@ class PoseEstimator():
 
         return 
 
-    def test_function(self, x, a, b):
-        return a * np.sin(b * x)
-        
+
+    def analysis_loop(self):
+        USEFUL_POINTS={"Nose": 0,  "RShoulder": 2, "LShoulder": 5, "RHip": 8, "RKnee": 9, 
+        "LHip": 11, "LKnee": 12, "REye": 14,"LEye": 15, "REar": 16, "LEar": 17}
+
+        for keypoint in USEFUL_POINTS:
+            i = USEFUL_POINTS[keypoint]
+            points = [pose.get_position(i)[0] for pose in self.poses if pose.get_position(i) is not None]
+            print(len(points))
+
+        return
+
+    
     def avg_points_detected(self):
         lst = []
         for pose in self.poses:

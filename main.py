@@ -28,7 +28,7 @@ if __name__ == '__main__':
     args = parser.parse_args() 
 
     frame_decomposer = FrameDecomposer(args.input, args.hoz_flip)
-    pose_estimator_a = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, True)
+    pose_estimator = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, True)
     
     frame_decomposer.decompose_video()
 
@@ -37,13 +37,11 @@ if __name__ == '__main__':
         a_points = []
 
         print("APPLYING POSE ESTIMATOR TO FRAMES")
-        # for current_frame in range(0, frame_decomposer.frame_count):
-        for current_frame in range(0, 10):
+        for current_frame in range(0, frame_decomposer.frame_count):
             frames.append(int(current_frame))
-            pose_estimator_a.get_pose_estimation(current_frame)
+            pose_estimator.get_pose_estimation(current_frame)
         
-        for pose in pose_estimator_a.poses:
-            pose.draw_pose()
+        pose_estimator.analysis_loop()
 
         
         

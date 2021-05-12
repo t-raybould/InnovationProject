@@ -12,7 +12,7 @@ class Pose():
 
     def get_position(self, body_part): 
         return self.points[body_part]
-
+        
     def draw_pose(self):
         if(self.rotate): self.frame = cv2.rotate(self.frame, cv2.ROTATE_90_CLOCKWISE)
 
