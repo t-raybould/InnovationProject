@@ -3,6 +3,8 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scipy.signal import find_peaks
+
 from FrameDecomposer import FrameDecomposer
 from PoseEstimator import PoseEstimator
 
@@ -41,8 +43,17 @@ if __name__ == '__main__':
             frames.append(int(current_frame))
             pose_estimator.get_pose_estimation(current_frame)
         
-        pose_estimator.analysis_loop()
+        frames, heights = pose_estimator.analysis_loop()
+        peaks = find_peaks(heights, height=0.9)
+        peak_heights = peaks[1]['peak_heights']
+        peak_pos = frames[peaks[0]]
 
+        print(peak_pos, peak_heights)
+
+        plt.scatter(frames, heights, label='Heights')
+        plt.scatter(peak_pos, peak_heights, label='Peaks')
+        plt.legend()
+        plt.show()
         
         
         # a_points = pose_estimator_a.avg_points_detected()
