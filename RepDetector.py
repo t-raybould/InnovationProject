@@ -27,8 +27,11 @@ class RepDetector():
         key_points = self.interleave_peaks_and_minimas(peak_pos, minima_pos)
         key_points = self.average_peaks(key_points)
         key_points = self.average_minimas(key_points)
+        
 
-        print(key_points)
+        x = len(key_points)
+        if(key_points[x - 1][1] == False):
+            key_points.append((frames[len(frames) - 1], True))
 
         new_peaks = [x[0] for x in key_points if x[1] == True]
         new_peak_heights = [heights[i] for i in new_peaks]
