@@ -3,10 +3,9 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
-from scipy.signal import find_peaks
-
 from FrameDecomposer import FrameDecomposer
 from PoseEstimator import PoseEstimator
+from RepDetector import RepDetector
 
 if __name__ == '__main__':
 
@@ -31,7 +30,8 @@ if __name__ == '__main__':
 
     frame_decomposer = FrameDecomposer(args.input, args.hoz_flip)
     pose_estimator = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, True)
-    
+    rep_detector = RepDetector()
+
     frame_decomposer.decompose_video()
 
     if(frame_decomposer.frame_count > 0):
@@ -44,18 +44,9 @@ if __name__ == '__main__':
             pose_estimator.get_pose_estimation(current_frame)
         
         frames, heights = pose_estimator.analysis_loop()
-        peaks = find_peaks(heights, height=0.9)
-        peak_heights = peaks[1]['peak_heights']
-        peak_pos = frames[peaks[0]]
+        rep_detector.find_reps(frames, heights)    
 
-        print(peak_pos, peak_heights)
-
-        plt.scatter(frames, heights, label='Heights')
-        plt.scatter(peak_pos, peak_heights, label='Peaks')
-        plt.legend()
-        plt.show()
-        
-        
+            
         # a_points = pose_estimator_a.avg_points_detected()
         # b_points = pose_estimator_b.avg_points_detected()
         # X_axis = np.arange(len(frames))
