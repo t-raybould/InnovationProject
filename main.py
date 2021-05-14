@@ -6,6 +6,7 @@ import numpy as np
 from FrameDecomposer import FrameDecomposer
 from PoseEstimator import PoseEstimator
 from RepDetector import RepDetector
+from Analyser import Analyser
 
 if __name__ == '__main__':
 
@@ -31,33 +32,23 @@ if __name__ == '__main__':
     frame_decomposer = FrameDecomposer(args.input, args.hoz_flip)
     pose_estimator = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, True)
     rep_detector = RepDetector()
+    analyser = Analyser()
 
+    print("DECOMPOSING VIDEO INTO FRAMES")
     frame_decomposer.decompose_video()
 
     if(frame_decomposer.frame_count > 0):
-        frames = []
+        frames = np.arange(frame_decomposer.frame_count)
         a_points = []
 
         print("APPLYING POSE ESTIMATOR TO FRAMES")
         for current_frame in range(0, frame_decomposer.frame_count):
-            frames.append(int(current_frame))
             pose_estimator.get_pose_estimation(current_frame)
         
-        frames, heights = pose_estimator.analysis_loop()
-        rep_detector.find_reps(frames, heights)    
+        print("IDENTIFYING REPS")
+        reps = rep_detector.find_reps(pose_estimator.poses)
 
-            
-        # a_points = pose_estimator_a.avg_points_detected()
-        # b_points = pose_estimator_b.avg_points_detected()
-        # X_axis = np.arange(len(frames))
-
-        # print(f"Min: {np.min(a_points)}, Max: {np.max(a_points)}, Mean: {np.mean(a_points)}")
-        # print(f"Min: {np.min(b_points)}, Max: {np.max(b_points)}, Mean: {np.mean(b_points)}")
-
-        # plt.plot(X_axis, a_points, label="Rotation Applied")
-        # plt.plot(X_axis, b_points, label="No Rotation")
-
-        # plt.xlabel("Frame")
-        # plt.ylabel("Number of points detected")
-        # plt.legend()
-        # plt.savefig('points_detected_graph.png')
+        print("ANALYSING REPS")
+        analyser.analyse(reps)
+        for rep in reps:
+            rep.draw()

@@ -1,0 +1,15 @@
+Number of reps counted: 3======= Rep 1 =======
+
+Start Position: 63 degrees
+Rating: Bad
+This angle is calculated at your elbow and needs to be as close to 180 degrees as possible.
+Your starting position can improvetry and make sure your arms are as straight as possible so that your shoulders, elbows, and wrists are vertically stacked======= Rep 2 =======
+
+Start Position: 45 degrees
+Rating: Bad
+This angle is calculated at your elbow and needs to be as close to 180 degrees as possible.
+Your starting position can improvetry and make sure your arms are as straight as possible so that your shoulders, elbows, and wrists are vertically stacked======= Rep 3 =======
+
+Start Position: 121 degrees
+Rating: Perfect
+This angle is calculated at your elbow and needs to be as close to 180 degrees as possible.

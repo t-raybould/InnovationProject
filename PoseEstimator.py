@@ -44,37 +44,6 @@ class PoseEstimator():
         self.poses.append(pose)
 
         return 
-
-
-    def analysis_loop(self):
-        USEFUL_POINTS={"Nose": 0,  "RShoulder": 2, "LShoulder": 5, "RHip": 8, "RKnee": 9, 
-        "LHip": 11, "LKnee": 12, "REye": 14,"LEye": 15, "REar": 16, "LEar": 17}
-        MIN_MAX_VALS={}
-        ratios = []
-        frames = np.arange(len(self.poses))
-
-        for keypoint in USEFUL_POINTS:
-            i = USEFUL_POINTS[keypoint]
-            points = [pose.get_position(i)[0] for pose in self.poses if pose.get_position(i) is not None]
-            if(len(points) > 0):
-                min_max = (np.min(points), np.max(points))
-                MIN_MAX_VALS.update({keypoint: min_max})
-        
-        for pose in self.poses:
-            pose_ratio = []
-            for keypoint in USEFUL_POINTS:
-                i = USEFUL_POINTS[keypoint]
-                height = pose.get_position(i)
-                if height is not None:
-                    x = (height[0] - MIN_MAX_VALS[keypoint][0]) / (MIN_MAX_VALS[keypoint][1] - MIN_MAX_VALS[keypoint][0])
-                    pose_ratio.append(x)
-            if(len(pose_ratio) > 0):
-                ratios.append(np.mean(pose_ratio))
-            else:
-                ratios.append(None)
-
-        return frames, ratios
-
     
     def avg_points_detected(self):
         lst = []
