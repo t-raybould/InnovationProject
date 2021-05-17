@@ -26,11 +26,10 @@ if __name__ == '__main__':
     parser.add_argument('--input', help='Path to video')
     parser.add_argument('--hoz-flip', help='Apply horizontal flip to images', default=0)
     parser.add_argument('--thr', default=0.25, help='Threshold confidence for pose estimation model')
-    parser.add_argument('--model', default='model/model.pb', help='Path to model')
     args = parser.parse_args() 
 
     frame_decomposer = FrameDecomposer(args.input, args.hoz_flip)
-    pose_estimator = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS, True)
+    pose_estimator = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS)
     rep_detector = RepDetector()
     analyser = Analyser()
 

@@ -13,14 +13,13 @@ class PoseEstimator():
         self.POSE_PAIRS = pose_pairs
         self.net = cv2.dnn.readNetFromTensorflow(model)
         self.poses = []
-        self.rotate = rotate
 
     def get_pose_estimation(self, frame_no):
         # Get the next frame to process
         path = str(Path().absolute()) + '/tmp_frames/frame_' + str(frame_no) + '.jpg'
         frame = cv2.imread(path)
         # Rotate the frame for better pose estimation
-        if(self.rotate): frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         frame_width = frame.shape[1]
         frame_height = frame.shape[0]
@@ -39,8 +38,8 @@ class PoseEstimator():
             y = (frame_height * point[1]) / out.shape[2]
             points.append((int(x), int(y)) if conf > self.threshold else None)
 
-        if(self.rotate): frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        pose = Pose(frame_no, frame, points, self.BODY_PARTS, self.POSE_PAIRS, self.rotate)
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        pose = Pose(frame_no, frame, points, self.BODY_PARTS, self.POSE_PAIRS)
         self.poses.append(pose)
 
         return 

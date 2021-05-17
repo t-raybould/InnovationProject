@@ -19,12 +19,10 @@ class FrameDecomposer():
         return file_loc.is_file()
 
     def check_rotation(self):
-        rotate_code = None
         probe = ffmpeg.probe(self.video_file_location)
         video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
         rotate = int(video_stream.get('tags', [dict(tags=dict())]).get('rotate', 0))
         
-        rotate_code = None
         if (rotate == 90):
             self.rotate_code = cv2.ROTATE_90_CLOCKWISE
         elif (rotate == 180):
@@ -33,6 +31,8 @@ class FrameDecomposer():
             self.rotate_code = cv2.ROTATE_90_COUNTERCLOCKWISE
 
         return 
+
+        
 
     def decompose_video(self):
         # Check that the file actually exists
