@@ -1,7 +1,7 @@
 import cv2
 
 class Pose():
-    def __init__(self, frame_no, frame, points, body_parts, pose_pairs, rotate):
+    def __init__(self, frame_no, frame, points, body_parts, pose_pairs):
         self.frame_no = frame_no
         self.frame = frame
         self.points = points

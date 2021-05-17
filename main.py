@@ -29,7 +29,7 @@ if __name__ == '__main__':
     args = parser.parse_args() 
 
     frame_decomposer = FrameDecomposer(args.input, args.hoz_flip)
-    pose_estimator = PoseEstimator(args.thr, args.model, BODY_PARTS, POSE_PAIRS)
+    pose_estimator = PoseEstimator(args.thr, 'model/model.pbNo', BODY_PARTS, POSE_PAIRS)
     rep_detector = RepDetector()
     analyser = Analyser()
 

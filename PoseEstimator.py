@@ -1,13 +1,10 @@
 import cv2
 from pathlib import Path
-from scipy import optimize
-import numpy as np
-import matplotlib.pyplot as plt
 
 from Pose import Pose
 
 class PoseEstimator():
-    def __init__(self, threshold, model, body_parts, pose_pairs, rotate):
+    def __init__(self, threshold, model, body_parts, pose_pairs):
         self.threshold = threshold
         self.BODY_PARTS = body_parts
         self.POSE_PAIRS = pose_pairs
@@ -19,14 +16,15 @@ class PoseEstimator():
         path = str(Path().absolute()) + '/tmp_frames/frame_' + str(frame_no) + '.jpg'
         frame = cv2.imread(path)
         # Rotate the frame for better pose estimation
+
         frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         frame_width = frame.shape[1]
         frame_height = frame.shape[0]
 
-        blob = cv2.dnn.blobFromImage(frame, 1.0, (368, 368), (127.5, 127.5, 127.5), swapRB=False, crop=False)
+        blob = cv2.dnn.blobFromImage(frame, 1.0, (299, 299), (127.5, 127.5, 127.5), swapRB=False, crop=False)
         self.net.setInput(blob)
-        out = self.net.forward()
+        out = self.net.forward()        
 
         points = []
 
