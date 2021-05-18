@@ -23,7 +23,7 @@ class RepDetector():
         return reps
 
     def distance_through_rep(self, poses):
-        USEFUL_POINTS={"Nose": 0,  "RShoulder": 2, "LShoulder": 5, "RHip": 8, "RKnee": 9, 
+        USEFUL_POINTS={"Nose": 0, "Neck": 1, "RShoulder": 2, "LShoulder": 5, "RHip": 8, "RKnee": 9, 
         "LHip": 11, "LKnee": 12, "REye": 14,"LEye": 15, "REar": 16, "LEar": 17}
         MIN_MAX_VALS={}
         ratios = []

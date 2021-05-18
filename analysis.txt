@@ -1,0 +1,31 @@
+Number of reps counted: 3
+======= Rep 1 =======
+
+Start Position Frame: 7
+Bottom Position Frame: 38
+End Position Frame: 56
+
+Angle at left elbow in top position: 91 degrees
+Angle at right elbow in top position: 171 degrees
+Angle at left elbow in bottom position: 61 degrees
+Angle at right elbow in bottom position: 57 degrees
+======= Rep 2 =======
+
+Start Position Frame: 56
+Bottom Position Frame: 78
+End Position Frame: 103
+
+Angle at left elbow in top position: 131 degrees
+Could not get information for right elbow angle in top position
+Angle at left elbow in bottom position: 58 degrees
+Could not get information for right elbow angle in bottom position
+======= Rep 3 =======
+
+Start Position Frame: 103
+Bottom Position Frame: 126
+End Position Frame: 153
+
+Angle at left elbow in top position: 114 degrees
+Angle at right elbow in top position: 180 degrees
+Angle at left elbow in bottom position: 62 degrees
+Angle at right elbow in bottom position: 49 degrees

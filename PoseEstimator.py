@@ -22,7 +22,7 @@ class PoseEstimator():
         frame_width = frame.shape[1]
         frame_height = frame.shape[0]
 
-        blob = cv2.dnn.blobFromImage(frame, 1.0, (299, 299), (127.5, 127.5, 127.5), swapRB=False, crop=False)
+        blob = cv2.dnn.blobFromImage(frame, 1.0, (224, 224), (127.5, 127.5, 127.5), swapRB=False, crop=False)
         self.net.setInput(blob)
         out = self.net.forward()        
 

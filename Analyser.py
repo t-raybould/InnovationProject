@@ -6,19 +6,6 @@ class Analyser():
         f = open("analysis.txt", "w")
         f.close()
 
-    def scale(self, actual, goal):
-        rating = round(actual/goal) * 10 
-
-        if (rating <= 3):
-            return "Bad"
-        elif (rating <= 5):
-            return "OK"
-        elif (rating <= 7):
-            return "Good"
-        elif (rating <= 9):
-            return "Great"
-        else: return "Perfect"
-
     def analyse(self, reps):
         
         self.rep_count(len(reps))
@@ -26,15 +13,14 @@ class Analyser():
         for rep in reps:
             f = open("analysis.txt", "a")
             f.write(f"======= Rep {rep.rep_index + 1} =======\n\n")
-            angle = self.start_position(rep)
-            rating = self.scale(angle, 180)
-            f.write(f"Start Position: {angle} degrees\n")
-            f.write(f"Rating: {rating}\n")
-            f.write(f"This angle is calculated at your elbow and needs to be as close to 180 degrees as possible.\n")
-            if(round(angle/180) * 10  < 6):
-                f.write(f"Your starting position can improve")
-                f.write(f"try and make sure your arms are as straight as possible so that your shoulders, elbows, and wrists are vertically stacked")
-                f.close()
+            f.write(f"Start Position Frame: {rep.start_pose.frame_no}\n")
+            f.write(f"Bottom Position Frame: {rep.bottom_pose.frame_no}\n")
+            f.write(f"End Position Frame: {rep.end_pose.frame_no}\n\n")
+            f.close()
+
+            self.start_position_elbow(rep)
+            self.bottom_position_elbow(rep)
+            
 
         return
 
@@ -44,7 +30,7 @@ class Analyser():
         f.close()
 
     def get_min_max(self, poses, d):
-        USEFUL_POINTS={"Nose": 0,  "RShoulder": 2, "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+        USEFUL_POINTS={"Nose": 0, "Neck": 1, "RShoulder": 2, "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
         "LHip": 11, "LKnee": 12, "REye": 14,"LEye": 15, "REar": 16, "LEar": 17}
         MIN_MAX_VALS={}
         USEABLE_POINTS = {}
@@ -92,7 +78,7 @@ class Analyser():
                 max = MIN_MAX_VALS[key][1]
                 y = min + (r * (max - min))
             else:
-                print("Need to be savvy")
+                return None
 
             MIN_MAX_VALS, USEABLE = self.get_min_max(rep_poses, 1)
             frames, dists = self.distance_through_rep(MIN_MAX_VALS, USEABLE, rep_poses, 1)
@@ -102,7 +88,7 @@ class Analyser():
                 max = MIN_MAX_VALS[key][1]
                 x = min + (r * (max - min))
             else:
-                print("Need to be savvy")
+                return None
 
             return (int(y), int(x))
         else:
@@ -111,31 +97,64 @@ class Analyser():
     def get_static_point(self, ind, poses, pose):
         if(pose.get_position(ind) is None):
             points = [p.get_position(ind) for p in poses if p.get_position(ind) is not None]
-            x = np.mean([p[1] for p in points])
-            y = np.mean([p[0] for p in points])
-            return (int(y), int(x))
-        else:
-            return pose.get_position(ind)
+            if(len(points) > 0):
+                x = np.mean([p[1] for p in points])
+                y = np.mean([p[0] for p in points])
+                return (int(y), int(x))
+            else: return None
+        else: return pose.get_position(ind)
 
-    def start_position(self, rep):
-        l_shoulder = self.get_moving_point("LShoulder", 5, 0, rep.rep_poses, rep.start_pose)
-        l_elbow = self.get_static_point(6, rep.rep_poses, rep.start_pose)
-        l_wrist = self.get_static_point(7, rep.rep_poses, rep.start_pose)
-        r_shoulder = self.get_moving_point("RShoulder", 2, 0, rep.rep_poses, rep.start_pose)
-        r_elbow = self.get_static_point(3, rep.rep_poses, rep.start_pose)
-        r_wrist = self.get_static_point(4, rep.rep_poses, rep.start_pose)
+    def get_angle(self, p1, p2, p3):
+        vec_1 = [p1[0] - p2[0], p1[1] - p2[1]]
+        vec_2 = [p3[0] - p2[0], p3[1] - p2[1]]
 
-        if not(l_elbow[1] > r_elbow[1]) ^ (l_wrist[1] < r_wrist[1]):
-            temp = l_wrist
-            l_wrist = r_wrist
-            r_wrist = temp
-        
-        vec_1 = [l_elbow[1] - l_shoulder[1], l_elbow[0] - l_shoulder[0]]
-        vec_2 = [l_wrist[1] - l_elbow[1], l_wrist[0] - l_elbow[0]]
-        
         vec_1 = vec_1 / np.linalg.norm(vec_1)
         vec_2 = vec_2 / np.linalg.norm(vec_2)
         angle = np.dot(vec_1, vec_2)
         angle = math.degrees(np.arccos(angle))
 
         return int(angle)
+
+    def start_position_elbow(self, rep):
+        f = open("analysis.txt", "a")
+        l_shoulder = self.get_moving_point("LShoulder", 5, 0, rep.rep_poses, rep.start_pose)
+        l_elbow = self.get_static_point(6, rep.rep_poses, rep.start_pose)
+        l_wrist = self.get_static_point(7, rep.rep_poses, rep.start_pose)
+
+        r_shoulder = self.get_moving_point("RShoulder", 2, 0, rep.rep_poses, rep.start_pose)
+        r_elbow = self.get_static_point(3, rep.rep_poses, rep.start_pose)
+        r_wrist = self.get_static_point(4, rep.rep_poses, rep.start_pose)
+        
+        if(l_shoulder is None) or (l_elbow is None) or (l_wrist is None):
+            f.write("Could not get information for left elbow angle in top position\n")
+        else:  
+            f.write(f"Angle at left elbow in top position: {self.get_angle(l_wrist, l_elbow, l_shoulder)} degrees\n")
+
+        if(r_shoulder is None) or (r_elbow is None) or (r_wrist is None):
+            f.write("Could not get information for right elbow angle in top position\n")
+        else:   
+            f.write(f"Angle at right elbow in top position: {self.get_angle(r_wrist, r_elbow, r_shoulder)} degrees\n")
+        f.close()
+
+    def bottom_position_elbow(self, rep):
+        f = open("analysis.txt", "a")
+
+        l_shoulder = self.get_moving_point("LShoulder", 5, 0, rep.rep_poses, rep.bottom_pose)
+        l_elbow = self.get_static_point(6, rep.rep_poses, rep.bottom_pose)
+        l_wrist = self.get_static_point(7, rep.rep_poses, rep.bottom_pose)
+        
+        r_shoulder = self.get_moving_point("RShoulder", 2, 0, rep.rep_poses, rep.bottom_pose)
+        r_elbow = self.get_static_point(3, rep.rep_poses, rep.bottom_pose)
+        r_wrist = self.get_static_point(4, rep.rep_poses, rep.bottom_pose)
+
+        if(l_shoulder is None) or (l_elbow is None) or (l_wrist is None):
+            f.write("Could not get information for left elbow angle in bottom position\n")
+        else:   
+            f.write(f"Angle at left elbow in bottom position: {self.get_angle(l_wrist, l_elbow, l_shoulder)} degrees\n")
+
+        if(r_shoulder is None) or (r_elbow is None) or (r_wrist is None):
+            f.write("Could not get information for right elbow angle in bottom position\n")
+        else:
+            print(r_shoulder, r_elbow, r_wrist)   
+            f.write(f"Angle at right elbow in bottom position: {self.get_angle(r_wrist, r_elbow, r_shoulder)} degrees\n")
+        f.close()
