@@ -1,0 +1,44 @@
+Number of reps counted: 3
+
+
+======= Rep 1 =======
+
+Start Position Frame: 7
+Bottom Position Frame: 38
+
+-------Start Position -------
+
+The angle at your left elbow is 91 degrees, which suggests your arm is not straight in that start of the rep
+Your hands are too far apart, they should be shoulder width
+-------Bottom Position -------
+
+Your bottom position is good
+
+======= Rep 2 =======
+
+Start Position Frame: 56
+Bottom Position Frame: 78
+
+-------Start Position -------
+
+The angle at your left elbow is 102 degrees, which suggests your arm is not straight in that start of the rep
+Could not get information for right arm in top position
+Could not get information to calculate shoulder width
+
+-------Bottom Position -------
+
+Could not get information for right elbow angle in bottom position
+
+
+======= Rep 3 =======
+
+Start Position Frame: 103
+Bottom Position Frame: 126
+
+-------Start Position -------
+
+The angle at your left elbow is 114 degrees, which suggests your arm is not straight in that start of the rep
+Your hands are too far apart, they should be shoulder width
+-------Bottom Position -------
+
+Your bottom position is good

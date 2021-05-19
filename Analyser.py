@@ -19,7 +19,6 @@ class Analyser():
 
             self.start_position_elbow(rep, ratios)
             self.start_position_shoulder_width(rep, ratios)
-            self.start_position_shoulder_width(rep, ratios)
             self.bottom_position_elbow(rep, ratios)
             
         return
@@ -99,21 +98,21 @@ class Analyser():
         r_elbow = self.get_point(3, rep.start_pose, ratios, rep.rep_poses)
         r_wrist = self.get_point(4, rep.start_pose, ratios, rep.rep_poses)
 
-        if(l_shoulder is None) or (l_elbow is None) or (l_wrist is None):
+        if(l_shoulder is None) or (l_elbow == None) or (l_wrist == None):
             f.write("Could not get information for left arm in top position\n")
             problem = True
         else:
             problem = problem or self.start_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
             problem = problem or self.vertical_arm(f, "left", l_wrist, l_shoulder)
         
-        if(r_shoulder is None) or (r_elbow is None) or (r_wrist is None):
+        if(r_shoulder == None) or (r_elbow == None) or (r_wrist == None):
             f.write("Could not get information for right arm in top position\n")
             problem = True
         else: 
             problem = problem or self.start_elbow_angle(f, "right", r_wrist, r_elbow, r_shoulder)
             problem = problem or self.vertical_arm(f, "right", r_wrist, r_shoulder)
     
-        if (problem is False):
+        if (problem == False):
             f.write("Your start position is good")
         
         f.close()
@@ -141,19 +140,19 @@ class Analyser():
         r_elbow = self.get_point(3, rep.bottom_pose, ratios, rep.rep_poses)
         r_wrist = self.get_point(4, rep.bottom_pose, ratios, rep.rep_poses)
 
-        if(l_shoulder is None) or (l_elbow is None) or (l_wrist is None):
+        if(l_shoulder == None) or (l_elbow == None) or (l_wrist == None):
             f.write("Could not get information for left elbow angle in bottom position\n")
             problem = True
         else:   
             problem = problem or self.bottom_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
 
-        if(r_shoulder is None) or (r_elbow is None) or (r_wrist is None):
+        if(r_shoulder == None) or (r_elbow == None) or (r_wrist == None):
             f.write("Could not get information for right elbow angle in bottom position\n")
             problem = True
         else:
             problem = problem or self.bottom_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
 
-        if (problem is False):
+        if (problem == False):
             f.write("Your bottom position is good")
 
         f.close()
@@ -161,20 +160,23 @@ class Analyser():
     def start_position_shoulder_width(self, rep, ratios):
         f = open("analysis.txt", "a")
 
-        l_shoulder = self.get_point(5, rep.start_pose, ratios, rep.rep_poses)
-        r_shoulder = self.get_point(2, rep.start_pose, ratios, rep.rep_poses)
-        l_wrist = self.get_point(7, rep.start_pose, ratios, rep.rep_poses)
-        r_wrist = self.get_point(4, rep.start_pose, ratios, rep.rep_poses)
+        l_shoulder = np.asarray(self.get_point(5, rep.start_pose, ratios, rep.rep_poses))
+        r_shoulder = np.asarray(self.get_point(2, rep.start_pose, ratios, rep.rep_poses))
+        l_wrist = np.asarray(self.get_point(7, rep.start_pose, ratios, rep.rep_poses))
+        r_wrist = np.asarray(self.get_point(4, rep.start_pose, ratios, rep.rep_poses))
 
-        s_dist = abs(np.linalg.norm(l_shoulder - r_shoulder))
-        w_dist = abs(np.linalg.norm(l_wrist - r_wrist))
-
-        if(w_dist < 0.9 * s_dist):
-            f.write("Your hands are too close together, they should be shoulder width apart")
-        elif(w_dist > 1.1 * s_dist):
-            f.write("Your hands are too close togethe, they should be shoulder width apart")
+        if(l_shoulder.any() == None) or (l_wrist.any() == None) or (r_wrist.any() == None) or (r_shoulder.any() == None):
+            f.write("Could not get information to calculate shoulder width\n")
         else:
-            f.write("Your hands are in the correct position")
+            s_dist = abs(np.linalg.norm(l_shoulder - r_shoulder))
+            w_dist = abs(np.linalg.norm(l_wrist - r_wrist))
+
+            if(w_dist < 0.9 * s_dist):
+                f.write("Your hands are too close together, they should be shoulder width apart")
+            elif(w_dist > 1.1 * s_dist):
+                f.write("Your hands are too far apart, they should be shoulder width")
+            else:
+                f.write("Your hands are in the correct position")
 
         f.close()
         
