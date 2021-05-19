@@ -12,13 +12,15 @@ class Analyser():
         
         for rep in reps:
             f = open("analysis.txt", "a")
-            f.write(f"======= Rep {rep.rep_index + 1} =======\n\n")
+            f.write(f"\n\n======= Rep {rep.rep_index + 1} =======\n\n")
             f.write(f"Start Position Frame: {rep.start_pose.frame_no}\n")
             f.write(f"Bottom Position Frame: {rep.bottom_pose.frame_no}\n")
             f.close()
 
             self.start_position_elbow(rep, ratios)
-            # self.bottom_position_elbow(rep, ratios)
+            self.start_position_shoulder_width(rep, ratios)
+            self.start_position_shoulder_width(rep, ratios)
+            self.bottom_position_elbow(rep, ratios)
             
         return
 
@@ -65,7 +67,7 @@ class Analyser():
 
         return int(angle)
 
-    def elbow_angle(self, f, side, wrist, elbow, shoulder):
+    def start_elbow_angle(self, f, side, wrist, elbow, shoulder):
         angle = self.get_angle(wrist, elbow, shoulder)
         if(angle < 160): 
             f.write(f"The angle at your {side} elbow is {angle} degrees, which suggests your arm is not straight in that start of the rep\n")
@@ -87,10 +89,12 @@ class Analyser():
         problem = False
 
         f = open("analysis.txt", "a")
+
+        f.write("\n-------Start Position -------\n\n")
+
         l_shoulder = self.get_point(5, rep.start_pose, ratios, rep.rep_poses)
         l_elbow = self.get_point(6, rep.start_pose, ratios, rep.rep_poses)
         l_wrist = self.get_point(7, rep.start_pose, ratios, rep.rep_poses)
-
         r_shoulder = self.get_point(2, rep.start_pose, ratios, rep.rep_poses)
         r_elbow = self.get_point(3, rep.start_pose, ratios, rep.rep_poses)
         r_wrist = self.get_point(4, rep.start_pose, ratios, rep.rep_poses)
@@ -99,37 +103,78 @@ class Analyser():
             f.write("Could not get information for left arm in top position\n")
             problem = True
         else:
-            problem = problem or self.elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
+            problem = problem or self.start_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
             problem = problem or self.vertical_arm(f, "left", l_wrist, l_shoulder)
         
         if(r_shoulder is None) or (r_elbow is None) or (r_wrist is None):
             f.write("Could not get information for right arm in top position\n")
             problem = True
         else: 
-            problem = problem or self.elbow_angle(f, "right", r_wrist, r_elbow, r_shoulder)
+            problem = problem or self.start_elbow_angle(f, "right", r_wrist, r_elbow, r_shoulder)
             problem = problem or self.vertical_arm(f, "right", r_wrist, r_shoulder)
     
         if (problem is False):
             f.write("Your start position is good")
+        
+        f.close()
+
+    def bottom_elbow_angle(self, f, side, wrist, elbow, shoulder):
+        angle = self.get_angle(wrist, elbow, shoulder)
+        if(angle > 90):
+            f.write(f"The angle at your {side} elbow is greater than 90 degrees, meaning you have not done a full range of motion\n")
+            return True
+        else:
+            return False
 
     def bottom_position_elbow(self, rep, ratios):
+
+        problem = False
+
         f = open("analysis.txt", "a")
 
-        l_shoulder = self.get_moving_point(5, rep.start_pose, ratios, rep.rep_poses)
-        l_elbow = self.get_static_point(6, rep.rep_poses, rep.bottom_pose)
-        l_wrist = self.get_static_point(7, rep.rep_poses, rep.bottom_pose)
-        
-        r_shoulder = self.get_moving_point(2, rep.start_pose, ratios, rep.rep_poses)
-        r_elbow = self.get_static_point(3, rep.rep_poses, rep.bottom_pose)
-        r_wrist = self.get_static_point(4, rep.rep_poses, rep.bottom_pose)
+        f.write("\n-------Bottom Position -------\n\n")
+
+        l_shoulder = self.get_point(5, rep.bottom_pose, ratios, rep.rep_poses)
+        l_elbow = self.get_point(6, rep.bottom_pose, ratios, rep.rep_poses)
+        l_wrist = self.get_point(7, rep.bottom_pose, ratios, rep.rep_poses)
+        r_shoulder = self.get_point(2, rep.bottom_pose, ratios, rep.rep_poses)
+        r_elbow = self.get_point(3, rep.bottom_pose, ratios, rep.rep_poses)
+        r_wrist = self.get_point(4, rep.bottom_pose, ratios, rep.rep_poses)
 
         if(l_shoulder is None) or (l_elbow is None) or (l_wrist is None):
             f.write("Could not get information for left elbow angle in bottom position\n")
+            problem = True
         else:   
-            f.write(f"Angle at left elbow in bottom position: {self.get_angle(l_wrist, l_elbow, l_shoulder)} degrees\n")
+            problem = problem or self.bottom_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
 
         if(r_shoulder is None) or (r_elbow is None) or (r_wrist is None):
             f.write("Could not get information for right elbow angle in bottom position\n")
+            problem = True
         else:
-            f.write(f"Angle at right elbow in bottom position: {self.get_angle(r_wrist, r_elbow, r_shoulder)} degrees\n")
+            problem = problem or self.bottom_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
+
+        if (problem is False):
+            f.write("Your bottom position is good")
+
         f.close()
+
+    def start_position_shoulder_width(self, rep, ratios):
+        f = open("analysis.txt", "a")
+
+        l_shoulder = self.get_point(5, rep.start_pose, ratios, rep.rep_poses)
+        r_shoulder = self.get_point(2, rep.start_pose, ratios, rep.rep_poses)
+        l_wrist = self.get_point(7, rep.start_pose, ratios, rep.rep_poses)
+        r_wrist = self.get_point(4, rep.start_pose, ratios, rep.rep_poses)
+
+        s_dist = abs(np.linalg.norm(l_shoulder - r_shoulder))
+        w_dist = abs(np.linalg.norm(l_wrist - r_wrist))
+
+        if(w_dist < 0.9 * s_dist):
+            f.write("Your hands are too close together, they should be shoulder width apart")
+        elif(w_dist > 1.1 * s_dist):
+            f.write("Your hands are too close togethe, they should be shoulder width apart")
+        else:
+            f.write("Your hands are in the correct position")
+
+        f.close()
+        
