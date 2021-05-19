@@ -45,9 +45,9 @@ if __name__ == '__main__':
             pose_estimator.get_pose_estimation(current_frame)
         
         print("IDENTIFYING REPS")
-        reps = rep_detector.find_reps(pose_estimator.poses)
+        reps, ratios = rep_detector.find_reps(pose_estimator.poses)
 
         print("ANALYSING REPS")
-        analyser.analyse(reps)
+        analyser.analyse(reps, ratios)
         for rep in reps:
             rep.draw()

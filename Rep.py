@@ -1,9 +1,8 @@
 class Rep():
-    def __init__(self, rep_index, top_pose, bottom_pose, end_pose, rep_poses):
+    def __init__(self, rep_index, top_pose, bottom_pose, rep_poses):
         self.rep_index = rep_index
         self.start_pose = top_pose
         self.bottom_pose = bottom_pose
-        self.end_pose = end_pose
         self.rep_poses = rep_poses
     
     def draw(self):

@@ -24,9 +24,9 @@ class Pose():
             if self.points[id_from] and self.points[id_to]:
                 cv2.line(self.frame, self.points[id_from], self.points[id_to], (0, 255, 0), 3)
             if self.points[id_from]:
-                cv2.ellipse(self.frame, self.points[id_from], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                cv2.ellipse(self.frame, self.points[id_from], (8, 8), 0, 0, 360, (0, 0, 255), cv2.FILLED)
             if self.points[id_to]:
-                cv2.ellipse(self.frame, self.points[id_to], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                cv2.ellipse(self.frame, self.points[id_to], (8, 8), 0, 0, 360, (0, 0, 255), cv2.FILLED)
 
         self.frame = cv2.rotate(self.frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
         cv2.imwrite("pose_frames/frame_%d.jpg" % self.frame_no, self.frame)

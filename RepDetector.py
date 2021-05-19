@@ -16,11 +16,10 @@ class RepDetector():
         for i in range(0, len(minima)):
             start = poses[peaks[i]]
             bottom = poses[minima[i]]
-            end = poses[peaks[i+1]]
             rep_poses = poses[peaks[i]:peaks[i+1]]
-            reps.append(Rep(i, start, bottom, end, rep_poses))
+            reps.append(Rep(i, start, bottom, rep_poses))
 
-        return reps
+        return reps, heights
 
     def distance_through_rep(self, poses):
         USEFUL_POINTS={"Nose": 0, "Neck": 1, "RShoulder": 2, "LShoulder": 5, "RHip": 8, "RKnee": 9, 
@@ -32,13 +31,13 @@ class RepDetector():
         for keypoint in USEFUL_POINTS:
             i = USEFUL_POINTS[keypoint]
             points = [pose.get_position(i)[0] for pose in poses if pose.get_position(i) is not None]
-            if(len(points) > 0):
+            if(len(points) > 2):
                 min_max = (np.min(points), np.max(points))
                 MIN_MAX_VALS.update({keypoint: min_max})
         
         for pose in poses:
             pose_ratio = []
-            for keypoint in USEFUL_POINTS:
+            for keypoint in MIN_MAX_VALS:
                 i = USEFUL_POINTS[keypoint]
                 height = pose.get_position(i)
                 if height is not None:
