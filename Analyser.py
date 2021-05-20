@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import math
+
 class Analyser():
     def __init__(self):
         f = open("analysis.txt", "w")
@@ -18,7 +18,7 @@ class Analyser():
             f.close()
 
             self.start_position_elbow(rep, ratios)
-            self.start_position_shoulder_width(rep, ratios)
+           # self.start_position_shoulder_width(rep, ratios)
             self.bottom_position_elbow(rep, ratios)
             
         return
@@ -59,6 +59,10 @@ class Analyser():
         vec_1 = [p1[0] - p2[0], p1[1] - p2[1]]
         vec_2 = [p3[0] - p2[0], p3[1] - p2[1]]
 
+
+        if((vec_1 == [0, 0]) | (vec_2 == [0, 0])):
+            return None
+
         vec_1 = vec_1 / np.linalg.norm(vec_1)
         vec_2 = vec_2 / np.linalg.norm(vec_2)
         angle = np.dot(vec_1, vec_2)
@@ -68,13 +72,16 @@ class Analyser():
 
     def start_elbow_angle(self, f, side, wrist, elbow, shoulder):
         angle = self.get_angle(wrist, elbow, shoulder)
-        if(angle < 160): 
+        if(angle == None):
+            f.write(f"Could not get information for {side} arm in top position\n")
+            return True
+        elif(angle < 160): 
             f.write(f"The angle at your {side} elbow is {angle} degrees, which suggests your arm is not straight in that start of the rep\n")
             return True
         else:
             return False
 
-    def vertical_arm(f, side, wrist, shoulder):
+    def vertical_arm(self, f, side, wrist, shoulder):
         if(wrist[1] - shoulder[1] < 20):
             f.write(f"Your {side} wrist is too far forward, move it so that your arm is vertical\n")
             return True
@@ -98,20 +105,22 @@ class Analyser():
         r_elbow = self.get_point(3, rep.start_pose, ratios, rep.rep_poses)
         r_wrist = self.get_point(4, rep.start_pose, ratios, rep.rep_poses)
 
-        if(l_shoulder is None) or (l_elbow == None) or (l_wrist == None):
+        if((l_shoulder == None) | (l_elbow == None) | (l_wrist == None)):
             f.write("Could not get information for left arm in top position\n")
             problem = True
         else:
-            problem = problem or self.start_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
-            problem = problem or self.vertical_arm(f, "left", l_wrist, l_shoulder)
+            elbow = self.start_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
+            arm = self.vertical_arm(f, "left", l_wrist, l_shoulder)
+            problem = elbow | arm | problem
         
-        if(r_shoulder == None) or (r_elbow == None) or (r_wrist == None):
+        if((r_shoulder == None) | (r_elbow == None) | (r_wrist == None)):
             f.write("Could not get information for right arm in top position\n")
             problem = True
         else: 
-            problem = problem or self.start_elbow_angle(f, "right", r_wrist, r_elbow, r_shoulder)
-            problem = problem or self.vertical_arm(f, "right", r_wrist, r_shoulder)
-    
+            elbow = self.start_elbow_angle(f, "right", r_wrist, r_elbow, r_shoulder)
+            arm = problem | self.vertical_arm(f, "right", r_wrist, r_shoulder)
+            problem = elbow | arm | problem
+
         if (problem == False):
             f.write("Your start position is good")
         
@@ -119,8 +128,11 @@ class Analyser():
 
     def bottom_elbow_angle(self, f, side, wrist, elbow, shoulder):
         angle = self.get_angle(wrist, elbow, shoulder)
-        if(angle > 90):
-            f.write(f"The angle at your {side} elbow is greater than 90 degrees, meaning you have not done a full range of motion\n")
+        if(angle == None):
+            f.write(f"Could not get information for {side} arm in bottom position\n")
+            return True
+        elif(angle > 90):
+            f.write(f"The angle at your {side} elbow is {angle}, greater than 90 degrees, meaning you have not done a full range of motion\n")
             return True
         else:
             return False
@@ -140,13 +152,13 @@ class Analyser():
         r_elbow = self.get_point(3, rep.bottom_pose, ratios, rep.rep_poses)
         r_wrist = self.get_point(4, rep.bottom_pose, ratios, rep.rep_poses)
 
-        if(l_shoulder == None) or (l_elbow == None) or (l_wrist == None):
+        if((l_shoulder == None) | (l_elbow == None) | (l_wrist == None)):
             f.write("Could not get information for left elbow angle in bottom position\n")
             problem = True
         else:   
             problem = problem or self.bottom_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
 
-        if(r_shoulder == None) or (r_elbow == None) or (r_wrist == None):
+        if((r_shoulder == None) | (r_elbow == None) | (r_wrist == None)):
             f.write("Could not get information for right elbow angle in bottom position\n")
             problem = True
         else:

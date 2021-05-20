@@ -11,7 +11,7 @@ class Pose():
     def get_position(self, body_part): 
         return self.points[body_part]
         
-    def draw_pose(self):
+    def draw_pose(self, file):
         self.frame = cv2.rotate(self.frame, cv2.ROTATE_90_CLOCKWISE)
 
         for pair in self.POSE_PAIRS:
@@ -29,7 +29,7 @@ class Pose():
                 cv2.ellipse(self.frame, self.points[id_to], (8, 8), 0, 0, 360, (0, 0, 255), cv2.FILLED)
 
         self.frame = cv2.rotate(self.frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        cv2.imwrite("pose_frames/frame_%d.jpg" % self.frame_no, self.frame)
+        cv2.imwrite(file, self.frame)
     
     def get_number_of_detected_points(self):
         return sum(x is not None for x in self.points)

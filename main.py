@@ -1,6 +1,4 @@
-import sys
 import argparse
-import matplotlib.pyplot as plt
 import numpy as np
 
 from FrameDecomposer import FrameDecomposer
@@ -9,7 +7,6 @@ from RepDetector import RepDetector
 from Analyser import Analyser
 
 if __name__ == '__main__':
-
     BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
     "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
     "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
@@ -35,7 +32,7 @@ if __name__ == '__main__':
 
     print("DECOMPOSING VIDEO INTO FRAMES")
     frame_decomposer.decompose_video()
-
+    
     if(frame_decomposer.frame_count > 0):
         frames = np.arange(frame_decomposer.frame_count)
         a_points = []
@@ -43,11 +40,12 @@ if __name__ == '__main__':
         print("APPLYING POSE ESTIMATOR TO FRAMES")
         for current_frame in range(0, frame_decomposer.frame_count):
             pose_estimator.get_pose_estimation(current_frame)
-        
+
         print("IDENTIFYING REPS")
         reps, ratios = rep_detector.find_reps(pose_estimator.poses)
 
         print("ANALYSING REPS")
         analyser.analyse(reps, ratios)
+
         for rep in reps:
             rep.draw()
