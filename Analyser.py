@@ -18,9 +18,8 @@ class Analyser():
             f.close()
 
             self.start_position(rep, ratios)
-            self.bottom_position(rep, ratios)
             self.shoulder_width(rep, ratios)
-
+            self.bottom_position(rep, ratios)
             
         return
 
@@ -101,14 +100,16 @@ class Analyser():
             problem = True
         else:
             elbow = self.start_elbow_angle(f, "left", l_wrist, l_elbow, l_shoulder)
-            problem = elbow  | problem
+            arm = self.vertical_arm(f, "left", l_wrist, l_shoulder)
+            problem = elbow | arm | problem
         
         if((r_shoulder == None) | (r_elbow == None) | (r_wrist == None)):
             f.write("Could not get information for right arm in top position\n")
             problem = True
         else: 
             elbow = self.start_elbow_angle(f, "right", r_wrist, r_elbow, r_shoulder)
-            problem = elbow | problem
+            arm = problem | self.vertical_arm(f, "right", r_wrist, r_shoulder)
+            problem = elbow | arm | problem
 
         if (problem == False):
             f.write("Your start position is good")
@@ -155,5 +156,38 @@ class Analyser():
 
         if (problem == False):
             f.write("Your bottom position is good")
+
+        f.close()
+
+    def vertical_arm(self, f, side, wrist, shoulder):
+        if(wrist[1] - shoulder[1] < 50):
+            f.write(f"Your {side} wrist is too far forward, move it so that your arm is vertical\n")
+            return True
+        elif(wrist[1] - shoulder[1] > 50):
+            f.write(f"Your {side} wrist is too far back, move it forward so that your arm is vertical\n")
+            return True
+        else:
+            return False
+
+    def shoulder_width(self, rep, ratios):
+        f = open("analysis.txt", "a")
+
+        l_shoulder = np.asarray(self.get_point(5, rep.start_pose, ratios, rep.rep_poses))
+        r_shoulder = np.asarray(self.get_point(2, rep.start_pose, ratios, rep.rep_poses))
+        l_wrist = np.asarray(self.get_point(7, rep.start_pose, ratios, rep.rep_poses))
+        r_wrist = np.asarray(self.get_point(4, rep.start_pose, ratios, rep.rep_poses))
+
+        if(l_shoulder.any() == None) or (l_wrist.any() == None) or (r_wrist.any() == None) or (r_shoulder.any() == None):
+            f.write("Could not get information to calculate shoulder width\n")
+        else:
+            s_dist = abs(np.linalg.norm(l_shoulder - r_shoulder))
+            w_dist = abs(np.linalg.norm(l_wrist - r_wrist))
+
+            if(w_dist < 0.9 * s_dist):
+                f.write("Your hands are too close together, they should be shoulder width apart")
+            elif(w_dist > 1.1 * s_dist):
+                f.write("Your hands are too far apart, they should be shoulder width")
+            else:
+                f.write("Your hands are in the correct position")
 
         f.close()
